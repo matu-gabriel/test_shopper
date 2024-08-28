@@ -1,0 +1,27 @@
+{
+  "name": "test_shopper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch ./src/index.ts"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Matusalem Gabriel",
+    "email": "matu.dev25@gmail.com",
+    "url": "https://www.github.com/matu-gabriel"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  }
+}
