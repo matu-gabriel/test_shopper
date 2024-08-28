@@ -1,17 +1,14 @@
-import express, { Request, Response } from "express";
-import packageJson from "../package.json";
+import express from "express";
 import "dotenv/config";
 import connectDB from "./database";
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(express.json());
-app.get("/", (req: Request, res: Response) => {
-  const { name, version, author } = packageJson;
-  res.send({ name, version, author });
-});
+import { router } from "./routes";
 
 connectDB().then(() => {
+  const app = express();
+  const PORT = process.env.PORT || 3000;
+
+  app.use(express.json());
+  app.use(router);
+
   app.listen(PORT, () => console.log(`Server is running at port ${PORT}`));
 });
