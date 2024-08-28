@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
 import packageJson from "../package.json";
+import "dotenv/config";
+import connectDB from "./database";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,4 +12,6 @@ app.get("/", (req: Request, res: Response) => {
   res.send({ name, version, author });
 });
 
-app.listen(PORT, () => console.log(`Server is running at port ${PORT}`));
+connectDB().then(() => {
+  app.listen(PORT, () => console.log(`Server is running at port ${PORT}`));
+});
