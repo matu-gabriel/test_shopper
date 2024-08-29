@@ -1,9 +1,12 @@
 import { Request, Response, Router } from "express";
 import packageJson from "../../package.json";
+import { sendReading } from "../controller/UploadDataController";
 
 export const router = Router();
 
-router.get("/teste", (req: Request, res: Response) => {
+router.get("/", (req: Request, res: Response) => {
   const { name, version } = packageJson;
   res.send({ name, version });
 });
+
+router.post("/upload", sendReading);
