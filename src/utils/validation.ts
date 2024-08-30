@@ -20,3 +20,10 @@ export const schemaValidation = Yup.object().shape({
     .oneOf(["WATER", "GAS"])
     .required("Measure type is required"),
 });
+
+export const validParams = Yup.object().shape({
+  measure_uuid: Yup.string().required("Measure UUID is required"),
+  confirmed_value: Yup.number()
+    .required("Confirmed value is required")
+    .integer("Confirmed value must be an integer"),
+});

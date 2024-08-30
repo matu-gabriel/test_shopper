@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { schemaValidation } from "../utils/Validation";
+import { schemaValidation, validParams } from "../utils/Validation";
 import Reading from "../model/ReadingModel";
 import { processImage } from "../service/AIService";
 
@@ -56,6 +56,39 @@ export const sendReading = async (req: Request, res: Response) => {
   }
 };
 
+export const confirmReading = async (req: Request, res: Response) => {
+  try {
+    // Validar dados
+    await validParams.validate(req.body, { abortEarly: false });
+
+    const { measure_uuid, confirmed_value } = req.body;
+
+    // Verificar se o codigo de leitura existe
+    const reading = await Reading.findOne({ measure_uuid });
+
+    if (!reading) {
+      return res
+        .status(404)
+        .json({ error_description: "Leitura não encontrada" });
+    }
+
+    // Verificar se o codigo de leitura já foi confirmado
+    if (reading.has_confirmed) {
+      return res
+        .status(409)
+        .json({ error_description: "A leitura já foi confirmada" });
+    }
+
+    reading.has_confirmed = true;
+    reading.confirmed_value = confirmed_value;
+    await reading.save();
+
+    return res.status(200).json({ success: "true" });
+  } catch (error) {
+    return res.status(400).json({ error: error });
+  }
+};
+
 export const getReadings = async (req: Request, res: Response) => {
   try {
     const { customer_code } = req.params;
@@ -75,9 +108,10 @@ export const getReadings = async (req: Request, res: Response) => {
     const readings = await Reading.find(filter);
 
     const measures = readings.map((reading) => ({
-      measure_uuid: reading._id,
+      measure_uuid: reading.measure_uuid,
       measure_datetime: reading.measure_datetime,
       measure_type: reading.measure_type,
+      has_confirmed: reading.has_confirmed,
       image_url: reading.image,
     }));
 
@@ -87,7 +121,7 @@ export const getReadings = async (req: Request, res: Response) => {
         .json({ message: "Nenhuma leitura encontrada para esse cliente" });
     }
 
-    return res.json({
+    return res.status(200).json({
       customer_code,
       measures,
     });
