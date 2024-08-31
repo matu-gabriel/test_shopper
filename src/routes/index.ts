@@ -5,6 +5,8 @@ import {
   sendReading,
 } from "../controller/UploadDataController";
 import { getReadings } from "../controller/UploadDataController";
+// import multerConfig from "../config/multer";
+import upload from "../config/multer";
 
 export const router = Router();
 
@@ -13,6 +15,6 @@ router.get("/", (req: Request, res: Response) => {
   res.send({ name, version });
 });
 
-router.post("/upload", sendReading);
+router.post("/upload", upload.single("image"), sendReading);
 router.get("/:customer_code/list", getReadings);
 router.patch("/confirm", confirmReading);
