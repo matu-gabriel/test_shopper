@@ -9,11 +9,12 @@ const isBase64 = (value: string): boolean => {
 };
 
 export const schemaValidation = Yup.object().shape({
-  image: Yup.string()
-    .test("is-base64", "Invalid base64 format", (value) =>
-      value ? isBase64(value) : false
-    )
-    .required("Image is required"),
+  // image: Yup.mixed()
+  //   .required("Image is require")
+  //   .test("fileType", "Unsupported File Format", (value) => {
+  //     if (!value) return false;
+  //     return ["image/jpeg", "image/png"].includes((value as any).mimetype);
+  //   }),
   customer_code: Yup.string().required("Customer code is required"),
   measure_datetime: Yup.string().required("Measure datatime is required"),
   measure_type: Yup.string()
