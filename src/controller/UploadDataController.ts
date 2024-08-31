@@ -2,14 +2,39 @@ import { Request, Response } from "express";
 import { schemaValidation, validParams } from "../utils/Validation";
 import Reading from "../model/ReadingModel";
 import { processImage } from "../service/AIService";
+import { v2 as cloudinary } from "cloudinary";
+import { v4 } from "uuid";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const sendReading = async (req: Request, res: Response) => {
   try {
     // Validando dados
     await schemaValidation.validate(req.body, { abortEarly: false });
 
+    // Verificando se o arquivo existe e se tem o tipo correto
+    if (!req.file) {
+      return res.status(400).json({ error: "Image is required" });
+    }
+
+    const allowedMimeTypes = ["image/jpeg", "image/png"];
+    if (!allowedMimeTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ error: "Unsupported File Format" });
+    }
+
     // Recebendo dados do corpo da requisição
-    const { image, customer_code, measure_datetime, measure_type } = req.body;
+    const { customer_code, measure_datetime, measure_type } = req.body;
+    const image = req.file;
+
+    const upload = await cloudinary.uploader.upload(req.file.path, {
+      folder: "uploads",
+      use_filename: true,
+      unique_filename: false,
+    });
 
     // Verificando se existe uma leitura no mês para este tipo de medição
     const existingReading = await Reading.findOne({
@@ -33,10 +58,12 @@ export const sendReading = async (req: Request, res: Response) => {
       return res.status(409).json({ error: "Leitura do mês já realizada" });
     }
 
-    const { uri, id } = await processImage(image);
+    const measure_uuid = v4();
+
+    const result = await processImage(image.path);
 
     const newReading = new Reading({
-      image,
+      image: image.path,
       customer_code,
       measure_type,
       measure_datetime,
@@ -44,7 +71,11 @@ export const sendReading = async (req: Request, res: Response) => {
 
     await newReading.save();
 
-    return res.status(201).json({ image_url: uri, measure_uuid: id });
+    return res.status(201).json({
+      image_url: upload.secure_url,
+      measure_value: result.measureValue,
+      measure_uuid,
+    });
   } catch (err) {
     if (err instanceof Error) {
       if (err.name === "ValidationError") {
@@ -52,7 +83,7 @@ export const sendReading = async (req: Request, res: Response) => {
       }
     }
     console.error("Erro ao processar a leitura:", err);
-    return res.status(500).json({ error: "Error processing the image" });
+    return res.status(500).json({ error: "Error ao processar imagem" });
   }
 };
 
