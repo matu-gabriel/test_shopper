@@ -12,7 +12,7 @@ Versão 1.0 - Test Shopper
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio.git
+   git clone https://github.com/matu-gabriel/test_shopper.git
    cd seu-repositorio
 
 2. Instale dependências
